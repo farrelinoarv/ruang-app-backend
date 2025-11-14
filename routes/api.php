@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\MidtransCallbackController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +15,9 @@ Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');
     Route::post('/login', [AuthController::class, 'login'])->name('auth.login');
 });
+
+// Categories
+Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
 // Midtrans Payment Callback (no auth required)
 Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle'])
