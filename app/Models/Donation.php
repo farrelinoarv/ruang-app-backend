@@ -19,6 +19,7 @@ class Donation extends Model
         'campaign_id',
         'user_id',
         'donor_name',
+        'is_anonymous',
         'amount',
         'message',
         'payment_method',
@@ -35,6 +36,7 @@ class Donation extends Model
      */
     protected $casts = [
         'amount' => 'decimal:2',
+        'is_anonymous' => 'boolean',
     ];
 
     /**
@@ -59,5 +61,14 @@ class Donation extends Model
     public function getIsSuccessAttribute(): bool
     {
         return $this->payment_status === 'success';
+    }
+
+    /**
+     * Get the display name for the donor.
+     * Returns "Seseorang" if anonymous, otherwise returns the donor's name.
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        return $this->is_anonymous ? 'Seseorang' : $this->donor_name;
     }
 }
