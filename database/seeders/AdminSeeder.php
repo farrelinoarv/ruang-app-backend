@@ -18,6 +18,9 @@ class AdminSeeder extends Seeder
             [
                 'email' => 'admin-ruang@secret.com',
                 'name' => 'admin-ruang',
+                'role' => 'admin',
+                'is_verified_civitas' => true,
+                'phone' => '0000000000',
                 'password' => Hash::make(env('ADMIN_DEFAULT_PASSWORD', 'password')),
             ]
         );

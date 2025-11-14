@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('password', 255);
             $table->enum('role', ['user', 'admin'])->default('user');
             $table->boolean('is_verified_civitas')->default(false);
-            $table->string('phone', 30)->nullable();
+            $table->string('phone', 30)->nullable()->unique();
             $table->rememberToken();
             $table->timestamps();
         });
