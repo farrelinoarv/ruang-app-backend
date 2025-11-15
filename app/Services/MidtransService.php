@@ -49,9 +49,25 @@ class MidtransService
     public static function handleCallback(array $payload): ?Donation
     {
         try {
+            Log::info('Processing Midtrans callback', [
+                'order_id' => $payload['order_id'] ?? 'MISSING',
+                'transaction_status' => $payload['transaction_status'] ?? 'MISSING',
+                'transaction_id' => $payload['transaction_id'] ?? 'MISSING',
+            ]);
+
             // Verify signature
             if (!self::verifySignature($payload)) {
-                Log::error('Invalid Midtrans signature', ['payload' => $payload]);
+                Log::error('Invalid Midtrans signature', [
+                    'payload' => $payload,
+                    'calculated' => hash(
+                        'sha512',
+                        ($payload['order_id'] ?? '') .
+                        ($payload['status_code'] ?? '') .
+                        ($payload['gross_amount'] ?? '') .
+                        config('services.midtrans.server_key')
+                    ),
+                    'received' => $payload['signature_key'] ?? 'MISSING',
+                ]);
                 return null;
             }
 
@@ -62,6 +78,8 @@ class MidtransService
                 Log::error('Donation not found', ['order_id' => $payload['order_id']]);
                 return null;
             }
+
+            Log::info('Donation found, current status: ' . $donation->payment_status);
 
             // Update donation based on transaction status
             $transactionStatus = $payload['transaction_status'] ?? '';
@@ -74,6 +92,7 @@ class MidtransService
                         'midtrans_transaction_id' => $payload['transaction_id'] ?? null,
                         'payment_method' => $payload['payment_type'] ?? null,
                     ]);
+                    Log::info('Payment captured successfully');
                 }
             } elseif ($transactionStatus === 'settlement') {
                 $donation->update([
@@ -81,21 +100,25 @@ class MidtransService
                     'midtrans_transaction_id' => $payload['transaction_id'] ?? null,
                     'payment_method' => $payload['payment_type'] ?? null,
                 ]);
+                Log::info('Payment settled successfully');
             } elseif ($transactionStatus === 'pending') {
                 $donation->update([
                     'payment_status' => 'pending',
                     'midtrans_transaction_id' => $payload['transaction_id'] ?? null,
                 ]);
+                Log::info('Payment still pending');
             } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
                 $donation->update([
                     'payment_status' => 'failed',
                     'midtrans_transaction_id' => $payload['transaction_id'] ?? null,
                 ]);
+                Log::info('Payment failed: ' . $transactionStatus);
             }
 
             // Fire event if payment is successful
             if ($donation->payment_status === 'success') {
                 event(new DonationPaid($donation));
+                Log::info('DonationPaid event fired for donation #' . $donation->id);
             }
 
             return $donation;
@@ -103,6 +126,7 @@ class MidtransService
             Log::error('Failed to handle Midtrans callback: ' . $e->getMessage(), [
                 'payload' => $payload,
                 'exception' => $e,
+                'trace' => $e->getTraceAsString(),
             ]);
             return null;
         }
