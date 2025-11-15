@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CampaignController;
 use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\DonationController;
 use App\Http\Controllers\Api\MidtransCallbackController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,6 +20,9 @@ Route::prefix('auth')->group(function () {
 
 // Categories
 Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+
+// Midtrans Callback (Public - Webhook)
+Route::post('/midtrans/callback', [MidtransCallbackController::class, 'handle'])->name('midtrans.callback');
 
 // ========================================
 // Protected Routes (Require Authentication)
@@ -39,9 +43,19 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/campaigns/{id}', [CampaignController::class, 'update'])->name('campaigns.update');
     Route::delete('/campaigns/{id}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
     Route::post('/campaigns/{id}/updates', [CampaignController::class, 'postUpdate'])->name('campaigns.postUpdate');
+
+    // Donations (Protected)
+    Route::post('/donations', [DonationController::class, 'store'])->name('donations.store');
+    Route::get('/donations/mine', [DonationController::class, 'myIndex'])->name('donations.mine');
 });
 
 // Campaigns (Public) - Wildcard routes come LAST
 Route::get('/campaigns', [CampaignController::class, 'index'])->name('campaigns.index');
 Route::get('/campaigns/{id}/updates', [CampaignController::class, 'getUpdates'])->name('campaigns.updates');
+Route::get('/campaigns/{id}/donations', [DonationController::class, 'getCampaignDonations'])->name('campaigns.donations');
 Route::get('/campaigns/{id}', [CampaignController::class, 'show'])->name('campaigns.show');
+
+// Donations (Public/Optional Auth)
+Route::get('/donations/{id}', [DonationController::class, 'show'])
+    ->middleware('auth:sanctum,optional')
+    ->name('donations.show');
