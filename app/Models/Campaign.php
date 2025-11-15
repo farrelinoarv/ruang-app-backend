@@ -28,6 +28,7 @@ class Campaign extends Model
         'deadline',
         'status',
         'cover_image',
+        'pending_changes',
     ];
 
     /**
@@ -39,6 +40,7 @@ class Campaign extends Model
         'target_amount' => 'decimal:2',
         'collected_amount' => 'decimal:2',
         'deadline' => 'date',
+        'pending_changes' => 'array',
     ];
 
     /**
@@ -88,7 +90,7 @@ class Campaign extends Model
     {
         return $this->hasMany(Update::class);
     }
-    
+
     /**
      * Get the progress percentage of the campaign.
      */
