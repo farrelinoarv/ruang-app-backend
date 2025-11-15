@@ -22,7 +22,7 @@ class UpdateFactory extends Factory
             'campaign_id' => Campaign::inRandomOrder()->first()->id ?? Campaign::factory(),
             'user_id' => User::inRandomOrder()->first()->id ?? User::factory(),
             'title' => fake()->sentence(),
-            'body' => fake()->paragraph(3),
+            'content' => fake()->paragraph(3),
         ];
     }
 }

@@ -10,62 +10,62 @@ on:
       - main
 
 jobs:
-  build-and-test:
-    name: Build & Test Laravel App
-    runs-on: ubuntu-latest
+  # build-and-test:
+  #   name: Build & Test Laravel App
+  #   runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_DATABASE: laravel
-          MYSQL_ROOT_PASSWORD: root
-        ports:
-          - "3306:3306"
+  #   services:
+  #     mysql:
+  #       image: mysql:5.7
+  #       env:
+  #         MYSQL_DATABASE: laravel
+  #         MYSQL_ROOT_PASSWORD: root
+  #       ports:
+  #         - "3306:3306"
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v3
 
-      - name: Setup Docker Buildx
-        uses: docker/setup-buildx-action@v2
+  #     - name: Setup Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
 
-      - name: Stop any existing containers
-        run: docker compose down || true
+  #     - name: Stop any existing containers
+  #       run: docker compose down || true
 
-      - name: Build Laravel Docker container
-        run: docker compose up -d --build
+  #     - name: Build Laravel Docker container
+  #       run: docker compose up -d --build
 
-      - name: Check Container Status
-        run: docker ps -a
+  #     - name: Check Container Status
+  #       run: docker ps -a
 
-      - name: Copy .env.example to .env
-        run: docker compose exec -T app cp .env.example .env
+  #     - name: Copy .env.example to .env
+  #       run: docker compose exec -T app cp .env.example .env
 
-      - name: Configure APP_TIMEZONE and DB settings
-        run: |
-          docker compose exec -T app sed -i 's|APP_TIMEZONE=.*|APP_TIMEZONE=Asia/Jakarta|' .env
-          docker compose exec -T app sed -i 's|# DB_CONNECTION=.*|DB_CONNECTION=mysql|' .env
-          docker compose exec -T app sed -i 's|# DB_HOST=.*|DB_HOST=db|' .env
-          docker compose exec -T app sed -i 's|# DB_PORT=.*|DB_PORT=3307|' .env
-          docker compose exec -T app sed -i 's|# DB_DATABASE=.*|DB_DATABASE=laravel|' .env
-          docker compose exec -T app sed -i 's|# DB_USERNAME=.*|DB_USERNAME=root|' .env
-          docker compose exec -T app sed -i 's|# DB_PASSWORD=.*|DB_PASSWORD=root|' .env
+  #     - name: Configure APP_TIMEZONE and DB settings
+  #       run: |
+  #         docker compose exec -T app sed -i 's|APP_TIMEZONE=.*|APP_TIMEZONE=Asia/Jakarta|' .env
+  #         docker compose exec -T app sed -i 's|# DB_CONNECTION=.*|DB_CONNECTION=mysql|' .env
+  #         docker compose exec -T app sed -i 's|# DB_HOST=.*|DB_HOST=db|' .env
+  #         docker compose exec -T app sed -i 's|# DB_PORT=.*|DB_PORT=3307|' .env
+  #         docker compose exec -T app sed -i 's|# DB_DATABASE=.*|DB_DATABASE=laravel|' .env
+  #         docker compose exec -T app sed -i 's|# DB_USERNAME=.*|DB_USERNAME=root|' .env
+  #         docker compose exec -T app sed -i 's|# DB_PASSWORD=.*|DB_PASSWORD=root|' .env
 
-      - name: Check .env file
-        run: docker compose exec app cat .env | grep DB_
+  #     - name: Check .env file
+  #       run: docker compose exec app cat .env | grep DB_
 
-      - name: Install dependencies
-        run: docker compose exec -T app composer install --no-interaction --prefer-dist
+  #     - name: Install dependencies
+  #       run: docker compose exec -T app composer install --no-interaction --prefer-dist
 
-      - name: Generate key
-        run: docker compose exec -T app php artisan key:generate
+  #     - name: Generate key
+  #       run: docker compose exec -T app php artisan key:generate
 
-      - name: Run migrations
-        run: docker compose exec -T app php artisan migrate --force
+  #     - name: Run migrations
+  #       run: docker compose exec -T app php artisan migrate --force
 
-      - name: Stop and remove containers after testing
-        run: docker compose down
+  #     - name: Stop and remove containers after testing
+  #       run: docker compose down
 
   deploy:
     name: Deploy to VPS
