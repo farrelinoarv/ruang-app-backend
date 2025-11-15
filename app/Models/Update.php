@@ -19,7 +19,7 @@ class Update extends Model
         'campaign_id',
         'user_id',
         'title',
-        'body',
+        'content',
         'media_path',
     ];
 

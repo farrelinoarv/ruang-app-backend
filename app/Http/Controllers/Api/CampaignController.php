@@ -234,13 +234,27 @@ class CampaignController extends Controller
             // Check edit permissions based on status
             if ($campaign->status === 'pending') {
                 // Handle image upload for pending campaigns
-                $updateData = [
-                    'title' => $request->title ?? $campaign->title,
-                    'description' => $request->description ?? $campaign->description,
-                    'category_id' => $request->category_id ?? $campaign->category_id,
-                    'target_amount' => $request->target_amount ?? $campaign->target_amount,
-                    'deadline' => $request->deadline ?? $campaign->deadline,
-                ];
+                $updateData = [];
+
+                if ($request->filled('title')) {
+                    $updateData['title'] = $request->title;
+                }
+
+                if ($request->filled('description')) {
+                    $updateData['description'] = $request->description;
+                }
+
+                if ($request->filled('category_id')) {
+                    $updateData['category_id'] = $request->category_id;
+                }
+
+                if ($request->filled('target_amount')) {
+                    $updateData['target_amount'] = $request->target_amount;
+                }
+
+                if ($request->filled('deadline')) {
+                    $updateData['deadline'] = $request->deadline;
+                }
 
                 if ($request->hasFile('cover_image')) {
                     // Delete old image if not default
@@ -248,12 +262,12 @@ class CampaignController extends Controller
                         \Storage::disk('public')->delete($campaign->cover_image);
                     }
                     $updateData['cover_image'] = $request->file('cover_image')->store('campaigns', 'public');
-                } else {
-                    $updateData['cover_image'] = $campaign->cover_image;
                 }
 
                 // Direct edit allowed for pending campaigns
-                $campaign->update($updateData);
+                if (!empty($updateData)) {
+                    $campaign->update($updateData);
+                }
 
                 return response()->json([
                     'success' => true,
@@ -261,6 +275,9 @@ class CampaignController extends Controller
                     'data' => [
                         'id' => $campaign->id,
                         'title' => $campaign->title,
+                        'description' => $campaign->description,
+                        'target_amount' => (float) $campaign->target_amount,
+                        'deadline' => $campaign->deadline->format('Y-m-d'),
                         'status' => $campaign->status,
                     ],
                 ], 200);
@@ -269,11 +286,11 @@ class CampaignController extends Controller
                 // Changes go to pending_changes, status becomes edit_pending
                 $pendingChanges = [];
 
-                if ($request->has('target_amount') && $request->target_amount != $campaign->target_amount) {
+                if ($request->filled('target_amount') && $request->target_amount != $campaign->target_amount) {
                     $pendingChanges['target_amount'] = $request->target_amount;
                 }
 
-                if ($request->has('deadline') && $request->deadline != $campaign->deadline->format('Y-m-d')) {
+                if ($request->filled('deadline') && $request->deadline != $campaign->deadline->format('Y-m-d')) {
                     $pendingChanges['deadline'] = $request->deadline;
                 }
 
@@ -302,11 +319,11 @@ class CampaignController extends Controller
                 // Update pending changes
                 $pendingChanges = $campaign->pending_changes ?? [];
 
-                if ($request->has('target_amount')) {
+                if ($request->filled('target_amount')) {
                     $pendingChanges['target_amount'] = $request->target_amount;
                 }
 
-                if ($request->has('deadline')) {
+                if ($request->filled('deadline')) {
                     $pendingChanges['deadline'] = $request->deadline;
                 }
 
@@ -441,7 +458,7 @@ class CampaignController extends Controller
             $update = Update::create([
                 'campaign_id' => $campaign->id,
                 'user_id' => $request->user()->id,
-                'title' => $request->title,
+                'title' => $request->input('title'),
                 'content' => $request->input('content'),
                 'media_path' => $mediaPath,
             ]);

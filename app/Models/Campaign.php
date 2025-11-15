@@ -39,7 +39,7 @@ class Campaign extends Model
     protected $casts = [
         'target_amount' => 'decimal:2',
         'collected_amount' => 'decimal:2',
-        'deadline' => 'date',
+        'deadline' => 'datetime',
         'pending_changes' => 'array',
     ];
 
