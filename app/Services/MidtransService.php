@@ -149,22 +149,31 @@ class MidtransService
      */
     public static function generateDonationParams(Donation $donation): array
     {
+        $amount = (int) $donation->amount;
+        
+        // Truncate campaign title to 50 characters (Midtrans limit)
+        $campaignTitle = $donation->campaign->title;
+        if (strlen($campaignTitle) > 37) {
+            $campaignTitle = substr($campaignTitle, 0, 37) . '...';
+        }
+        $itemName = 'Donasi: ' . $campaignTitle;
+
         return [
             'transaction_details' => [
                 'order_id' => $donation->midtrans_order_id,
-                'gross_amount' => (int) $donation->amount,
+                'gross_amount' => $amount,
             ],
             'customer_details' => [
-                'first_name' => $donation->donor_name,
+                'first_name' => substr($donation->donor_name ?? 'Anonymous', 0, 50),
                 'email' => $donation->user->email ?? 'anonymous@ruang.id',
                 'phone' => $donation->user->phone ?? '081234567890',
             ],
             'item_details' => [
                 [
-                    'id' => $donation->campaign_id,
-                    'price' => (int) $donation->amount,
+                    'id' => 'DONATION-' . $donation->campaign_id,
+                    'price' => $amount,
                     'quantity' => 1,
-                    'name' => 'Donasi untuk ' . $donation->campaign->title,
+                    'name' => $itemName,
                 ],
             ],
             'enabled_payments' => [
