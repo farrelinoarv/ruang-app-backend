@@ -29,7 +29,7 @@ class CreateCampaignRequest extends FormRequest
             'description' => 'required|string',
             'target_amount' => 'required|numeric|min:100000|max:1000000000',
             'deadline' => 'required|date|after:today',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ];
     }
 

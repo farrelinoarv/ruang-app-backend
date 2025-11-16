@@ -29,7 +29,7 @@ class UpdateCampaignRequest extends FormRequest
             'description' => 'sometimes|string',
             'target_amount' => 'sometimes|numeric|min:100000|max:1000000000',
             'deadline' => 'sometimes|date|after:today',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
         ];
     }
 

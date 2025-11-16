@@ -150,7 +150,7 @@ class MidtransService
     public static function generateDonationParams(Donation $donation): array
     {
         $amount = (int) $donation->amount;
-        
+
         // Truncate campaign title to 50 characters (Midtrans limit)
         $campaignTitle = $donation->campaign->title;
         if (strlen($campaignTitle) > 37) {

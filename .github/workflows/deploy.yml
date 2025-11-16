@@ -152,7 +152,7 @@ jobs:
           cd ~/projects/ruang-app-backend/
 
           echo "Running database migrations..."
-          docker compose exec -T app php artisan migrate:fresh --force --seed
+          docker compose exec -T app php artisan migrate --force
 
           echo "Post-deployment configuration completed!"
           EOF
